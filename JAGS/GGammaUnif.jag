@@ -1,0 +1,29 @@
+model {
+  for(i in 1:N){
+# Interval censoring of the endpoint
+           type_S[i] ~ dinterval(Y[i], C[i,1:2])
+            C[i,1] <- max(0.000000001, (SL[i]-E[i]))
+            C[i,2] <- max(0.000000001, (SR[i]-E[i]))
+
+# Uniform infection time
+            E[i] ~ dunif(0, ER[i])
+
+# Generalized gamma-distributed time-to-event
+            Y[i] ~ dgen.gamma(r, lambda, b) T(0, Trunc[i]-E[i])
+  }
+
+# Priors
+  r ~ dnorm(0, 1/1000) T(0, )
+  lambda ~ dnorm(0, 1/1000) T(0, )
+  b ~ dnorm(0, 1/1000) T(0, )
+
+# Mean and quantiles
+mean  <- exp(loggam(r+1/b)-loggam(r))/lambda
+perc50 <- qgen.gamma(0.5, r, lambda, b)
+perc90 <- qgen.gamma(0.9, r, lambda, b)
+perc95 <- qgen.gamma(0.95, r, lambda, b)
+perc97.5 <- qgen.gamma(0.975, r, lambda, b)
+perc99 <- qgen.gamma(0.99, r, lambda, b)
+
+
+}
